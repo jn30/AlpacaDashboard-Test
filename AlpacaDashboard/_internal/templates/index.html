@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpaca Trading Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Alpaca Dashboard</a>
+            <a class="nav-link" href="/order-history">Order History</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4" id="dashboard-container">
+        <!-- Account Info -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Account Overview</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="account-info" class="row">
+                            <div class="col"><strong>Portfolio Value:</strong> <span id="portfolio-value">Loading...</span></div>
+                            <div class="col"><strong>Buying Power:</strong> <span id="buying-power">Loading...</span></div>
+                            <div class="col"><strong>Status:</strong> <span id="account-status">Loading...</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Allocation Chart -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Target vs. Actual Allocation</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="allocation-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Basket Trading -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card" id="basket-manager">
+                    <div class="card-header">
+                        <h4>Basket Trading</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Basket Management -->
+                            <div class="col-md-7">
+                                <h5>Manage Baskets</h5>
+                                <div class="input-group mb-3">
+                                    <select class="form-select" id="basket-select"></select>
+                                    <button class="btn btn-primary" id="create-basket-btn">New</button>
+                                    <button class="btn btn-danger" id="delete-basket-btn">Delete</button>
+                                    <button class="btn btn-success" id="import-basket-btn">Import</button>
+                                    <button class="btn btn-info" id="export-basket-btn">Export</button>
+                                    <input type="file" id="import-basket-file" style="display: none;" accept=".json">
+                                </div>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Symbol</th>
+                                            <th>Target %</th>
+                                            <th>Actual %</th>
+                                            <th>Current Value</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="basket-assets-table">
+                                        <!-- JS will populate this -->
+                                    </tbody>
+                                </table>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>Target Total: <span id="basket-target-percentage">0</span>%</strong>
+                                        <div id="basket-percentage-error" class="text-danger"></div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <h6>Global Actions</h6>
+                                <button class="btn btn-warning" id="reset-api-key-btn">Reset API Key</button>
+                                <h5 class="mt-2">Total Basket Value in Portfolio: <span id="basket-total-value">$0.00</span></h5>
+                                <hr>
+                                <h6>Add to Basket</h6>
+                                <form id="add-to-basket-form" class="row g-3">
+                                    <div class="col-auto">
+                                        <input type="text" class="form-control" id="basket-asset-symbol" placeholder="Symbol">
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="number" class="form-control" id="basket-asset-percentage" placeholder="%" step="0.01">
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="submit" class="btn btn-secondary">Add</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <!-- Basket Execution -->
+                            <div class="col-md-5">
+                                <h5>Execute Intelligent Buy</h5>
+                                <p>This will use new funds to buy underweight assets to move your portfolio towards its target allocation.</p>
+                                <p>Buy <strong id="execution-basket-name">No Basket Selected</strong></p>
+                                <form id="execute-basket-form">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="basket-total-amount" placeholder="Total Investment Amount" required step="0.01">
+                                    </div>
+                                    <button type="submit" class="btn btn-success w-100">Buy Basket</button>
+                                </form>
+                                <div id="basket-execution-result" class="mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Positions -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Current Positions</h4>
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Quantity</th>
+                                    <th>Market Value</th>
+                                    <th>Current Price</th>
+                                    <th>Unrealized P/L</th>
+                                </tr>
+                            </thead>
+                            <tbody id="positions-table">
+                                <!-- JS will populate this -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
